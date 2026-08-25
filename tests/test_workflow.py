@@ -6,6 +6,9 @@ from pathlib import Path
 from agents.base import AgentResult
 from config import AgentConfig
 from orchestrator import SafetyOrchestrator
+from audit import AuditIntegrityError, AuditTrail
+from memory import SafetyMemory
+from security.permissions import BoundSafetyMemory, PermissionDenied, PermissionPolicy
 
 
 class FailingAgent:
@@ -91,6 +94,49 @@ class SafetyWorkflowTests(unittest.TestCase):
         orchestrator.run(self.system_id)
         self.assertTrue(str(self.config.notes_dir).startswith(str(self.root)))
         self.assertTrue((self.config.notes_dir / f"{self.system_id}_scope.md").exists())
+
+    def test_least_privilege_denies_unauthorized_export(self):
+        audit = AuditTrail(self.root / "audit" / "permission-test.jsonl")
+        bound = BoundSafetyMemory(
+            SafetyMemory(self.config),
+            "scope",
+            PermissionPolicy.default(),
+            audit,
+        )
+        with self.assertRaises(PermissionDenied):
+            bound.write_export("unauthorized.txt", "should not be written")
+        self.assertFalse((self.config.exports_dir / "unauthorized.txt").exists())
+        self.assertTrue(audit.verify()["valid"])
+
+    def test_successful_run_produces_valid_hash_chained_audit(self):
+        report = SafetyOrchestrator(self.config).run(self.system_id)
+        self.assertTrue(report.audit_valid)
+        result = AuditTrail(Path(report.audit_path)).verify()
+        self.assertTrue(result["valid"])
+        self.assertGreater(result["records"], 20)
+
+    def test_audit_tampering_is_detected(self):
+        report = SafetyOrchestrator(self.config).run(self.system_id)
+        audit_path = Path(report.audit_path)
+        lines = audit_path.read_text(encoding="utf-8").splitlines()
+        lines[1] = lines[1].replace('"outcome": "allowed"', '"outcome": "altered"')
+        audit_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        with self.assertRaises(AuditIntegrityError):
+            AuditTrail(audit_path).verify()
+
+    def test_permission_denial_is_audited(self):
+        audit = AuditTrail(self.root / "audit" / "denial-test.jsonl")
+        bound = BoundSafetyMemory(
+            SafetyMemory(self.config),
+            "red_team",
+            PermissionPolicy.default(),
+            audit,
+        )
+        with self.assertRaises(PermissionDenied):
+            bound.read_policy()
+        record = audit.path.read_text(encoding="utf-8")
+        self.assertIn('"outcome": "denied"', record)
+        self.assertIn('"actor": "red_team"', record)
 
 
 if __name__ == "__main__":
