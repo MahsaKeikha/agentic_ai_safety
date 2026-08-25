@@ -3,13 +3,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 REVIEW_ROOT = Path(__file__).resolve().parent / "examples" / "sample_review"
-SYSTEMS_DIR = REVIEW_ROOT / "systems"
-POLICIES_DIR = REVIEW_ROOT / "policies"
-EVALS_DIR = REVIEW_ROOT / "evals"
-NOTES_DIR = REVIEW_ROOT / "notes"
-DRAFTS_DIR = REVIEW_ROOT / "drafts"
-EXPORTS_DIR = REVIEW_ROOT / "exports"
-INCIDENTS_DIR = REVIEW_ROOT / "incidents"
 CHECKLISTS_DIR = Path(__file__).resolve().parent / "checklists"
 
 DEFAULT_MODEL = "claude-sonnet-4-20250514"
@@ -26,6 +19,42 @@ class AgentConfig:
     offline: bool = True
     api_key: Optional[str] = None
 
+    @property
+    def systems_dir(self) -> Path:
+        return self.review_root / "systems"
+
+    @property
+    def policies_dir(self) -> Path:
+        return self.review_root / "policies"
+
+    @property
+    def evals_dir(self) -> Path:
+        return self.review_root / "evals"
+
+    @property
+    def notes_dir(self) -> Path:
+        return self.review_root / "notes"
+
+    @property
+    def drafts_dir(self) -> Path:
+        return self.review_root / "drafts"
+
+    @property
+    def exports_dir(self) -> Path:
+        return self.review_root / "exports"
+
+    @property
+    def incidents_dir(self) -> Path:
+        return self.review_root / "incidents"
+
     def ensure_dirs(self) -> None:
-        for d in (SYSTEMS_DIR, POLICIES_DIR, EVALS_DIR, NOTES_DIR, DRAFTS_DIR, EXPORTS_DIR, INCIDENTS_DIR):
-            d.mkdir(parents=True, exist_ok=True)
+        for directory in (
+            self.systems_dir,
+            self.policies_dir,
+            self.evals_dir,
+            self.notes_dir,
+            self.drafts_dir,
+            self.exports_dir,
+            self.incidents_dir,
+        ):
+            directory.mkdir(parents=True, exist_ok=True)
