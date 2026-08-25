@@ -202,6 +202,14 @@ A production implementation can add:
 - audit trails
 - release-management connectors behind human authorization
 
+## Enforced least privilege and audit integrity
+
+Each agent receives a role-bound memory interface. The permission policy grants only the reads and writes required by that role. Unauthorized operations are denied before execution and recorded in the audit trail.
+
+Every review writes an append-only JSONL audit at `audit/events.jsonl`. Records include sequence, UTC timestamp, actor, action, target, outcome, the previous record hash, and a SHA-256 record hash. The verifier detects edited content, deleted or reordered records, and broken hash links.
+
+These controls make the reference workflow tamper-evident. They do not make the host filesystem immutable. Production deployments should add protected remote storage, access control, retention policy, signing or external anchoring, and independent monitoring.
+
 ## Public verification evidence
 
 The repository includes deterministic offline tests and a held-out control-path suite.
