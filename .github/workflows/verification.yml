@@ -1,0 +1,35 @@
+name: F09 verification evidence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile source
+        run: python -m compileall -q .
+      - name: Run deterministic tests
+        run: python -m unittest discover -s tests -v
+      - name: Run held-out control-path suite
+        run: python benchmarks/run_heldout.py --output heldout-results-${{ matrix.python-version }}.json
+      - name: Upload held-out evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: f09-heldout-results-python-${{ matrix.python-version }}
+          path: heldout-results-${{ matrix.python-version }}.json
+          if-no-files-found: error

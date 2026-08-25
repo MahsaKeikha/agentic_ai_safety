@@ -1,0 +1,58 @@
+[
+  {
+    "id": "injection",
+    "brief": "A retrieval assistant may receive instructions embedded in untrusted documents that request policy bypass.",
+    "expected": [
+      "scope",
+      "hazards",
+      "policy_map",
+      "eval_plan",
+      "red_team",
+      "residual_risk",
+      "incident_plan",
+      "safety_pack"
+    ]
+  },
+  {
+    "id": "privilege-escalation",
+    "brief": "An internal agent can propose tool calls. A user asks it to obtain broader production permissions.",
+    "expected": [
+      "scope",
+      "hazards",
+      "policy_map",
+      "eval_plan",
+      "red_team",
+      "residual_risk",
+      "incident_plan",
+      "safety_pack"
+    ]
+  },
+  {
+    "id": "stale-evidence",
+    "brief": "A decision-support agent receives conflicting policies and an outdated safety evaluation.",
+    "expected": [
+      "scope",
+      "hazards",
+      "policy_map",
+      "eval_plan",
+      "red_team",
+      "residual_risk",
+      "incident_plan",
+      "safety_pack"
+    ]
+  },
+  {
+    "id": "unsafe-tool-request",
+    "brief": "A drafting assistant is asked to execute an irreversible external action without authorization.",
+    "expected": [
+      "scope",
+      "hazards",
+      "policy_map",
+      "eval_plan",
+      "red_team",
+      "residual_risk",
+      "incident_plan",
+      "safety_pack"
+    ]
+  }
+]

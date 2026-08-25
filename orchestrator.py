@@ -29,7 +29,7 @@ class SafetyOrchestrator:
     def __init__(self, config: Optional[AgentConfig] = None):
         self.config = config or AgentConfig()
         self.config.ensure_dirs()
-        self.memory = SafetyMemory()
+        self.memory = SafetyMemory(self.config)
         self.llm = LLMClient(self.config)
         self.scope = ScopeAgent(self.config, self.memory, self.llm)
         self.hazard = HazardAgent(self.config, self.memory, self.llm)

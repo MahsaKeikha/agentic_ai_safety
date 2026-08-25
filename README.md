@@ -202,6 +202,21 @@ A production implementation can add:
 - audit trails
 - release-management connectors behind human authorization
 
+## Public verification evidence
+
+The repository includes deterministic offline tests and a held-out control-path suite.
+
+```bash
+python -m unittest discover -s tests -v
+python benchmarks/run_heldout.py --output heldout-results.json
+```
+
+Continuous integration runs the suite on Python 3.10, 3.11, and 3.12 and publishes the held-out result JSON as a workflow artifact.
+
+The current held-out suite covers untrusted instruction injection, privilege escalation, stale evidence, and unsafe tool requests. It verifies artifact completeness, fail-closed stopping, workspace isolation, and enforcement of the human release gate.
+
+This is structural control-path evidence. It is not a semantic safety benchmark, production validation, independent review, or certification.
+
 ## Evaluation strategy
 
 Useful evaluation dimensions include:
