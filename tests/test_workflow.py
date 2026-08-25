@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -119,7 +120,9 @@ class SafetyWorkflowTests(unittest.TestCase):
         report = SafetyOrchestrator(self.config).run(self.system_id)
         audit_path = Path(report.audit_path)
         lines = audit_path.read_text(encoding="utf-8").splitlines()
-        lines[1] = lines[1].replace('"outcome": "allowed"', '"outcome": "altered"')
+        record = json.loads(lines[1])
+        record["outcome"] = "altered"
+        lines[1] = json.dumps(record, sort_keys=True)
         audit_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         with self.assertRaises(AuditIntegrityError):
             AuditTrail(audit_path).verify()
